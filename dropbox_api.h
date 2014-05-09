@@ -1,6 +1,10 @@
 #ifndef __DB_API_H__
 #define __DB_API_H__
-#include <curl/curl.h>
+#ifdef WIN32
+#	include "curl/include/curl/curl.h"	
+#else
+#	include <curl/curl.h>
+#endif
 #include <json-c/json.h>
 #include <stdbool.h>
 
