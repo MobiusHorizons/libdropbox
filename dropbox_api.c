@@ -12,7 +12,8 @@
 	#include <io.h>
 	#include <fcntl.h>
 	#define pipe(fds) _pipe(fds,4096, _O_BINARY) 
-	#define SSL_CERT curl_easy_setopt(curl, CURLOPT_CAPATH, "./ca-bundle.crt");
+	#define SSL_CERT
+//	#define SSL_CERT curl_easy_setopt(curl, CURLOPT_CAPATH, "c:\\windows\\curl-ca-bundle.crt"); 
 #else
 	#define SSL_CERT
 //	#define SSL_CERT curl_easy_setopt(curl, CURLOPT_CAPATH, "./ca-bundle.crt");
@@ -124,13 +125,14 @@ FILE * REST_GET	(char ** params, char * url){
 	FILE * write = fdopen(fd[1], "w");
 	CURL * curl = curl_easy_init();
 	SSL_CERT
+	printf("url = %s\n",full_url);
 	curl_easy_setopt(curl,CURLOPT_URL,full_url);
 	curl_easy_setopt(curl,CURLOPT_WRITEDATA,(void*)write);
 	curl_easy_setopt(curl,CURLOPT_WRITEFUNCTION,WriteFileCB);
 	run_curl_args *args = malloc(sizeof(run_curl_args));
 	args->curl = curl;
 	args->file = write;
-	args->url = url;
+	args->url = full_url;
 	pthread_create(&threads[fd[1]],NULL, run_curl, args);
 	return read;
 }
@@ -141,9 +143,14 @@ buffer REST_GET_BUFFER (char ** params, char * url){
 	SSL_CERT
 	buffer data = buffer_init(data,0);
 	curl_easy_setopt(curl,CURLOPT_URL,full_url);
+	printf("url = %s\n",full_url);
 	curl_easy_setopt(curl,CURLOPT_WRITEDATA,&data);
+//	curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 	curl_easy_setopt(curl,CURLOPT_WRITEFUNCTION,WriteBufferCB);
 	CURLcode res = curl_easy_perform(curl);
+	if (res != CURLE_OK){
+		printf("code = %d, data= %s\n",res,data.data);
+	}
 	curl_easy_cleanup(curl);
 	free(full_url);
 	return data;
@@ -151,8 +158,9 @@ buffer REST_GET_BUFFER (char ** params, char * url){
 
 buffer  REST_POST (char ** params, char * url){
 	CURL * curl = curl_easy_init();
-	char * post = rest_build_url(params,"");
+	char * post = rest_build_url(params,""); post++;
 	char * escaped_url = rest_escape(url);
+	
 	SSL_CERT
 	buffer data = buffer_init(data,0);
 	curl_easy_setopt(curl,CURLOPT_URL,escaped_url);
@@ -161,8 +169,9 @@ buffer  REST_POST (char ** params, char * url){
 	curl_easy_setopt(curl,CURLOPT_WRITEDATA, &data);
 	curl_easy_setopt(curl,CURLOPT_WRITEFUNCTION,WriteBufferCB);
 	CURLcode res = curl_easy_perform(curl);
+	printf("res = &d, data = %s\n",res,data.data);
 	curl_easy_cleanup(curl);
-	free(post);
+	free(--post);
 	free(escaped_url);
 	return data;
 }

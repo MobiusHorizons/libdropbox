@@ -86,7 +86,7 @@ int main(int argc, char** argv){
 	const char * access_token = init(client_key,client_secret);
 	printf("access_token = %s\n",access_token);
 	if (argc > 2 && strcmp(argv[1],"ls")== 0 ){
-		if (argc== 2) do_ls("/",access_token);
+		if (argc == 2) do_ls("/",access_token);
 		else do_ls(argv[2],access_token);
 	} else if (argc >=2 && strcmp(argv[1],"metadata")==0){
 		do_metadata(argv[2],access_token);
