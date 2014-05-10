@@ -12,8 +12,7 @@
 	#include <io.h>
 	#include <fcntl.h>
 	#define pipe(fds) _pipe(fds,4096, _O_BINARY) 
-	#define SSL_CERT
-//	#define SSL_CERT curl_easy_setopt(curl, CURLOPT_CAPATH, "c:\\windows\\curl-ca-bundle.crt"); 
+	#define SSL_CERT char SSL_CA_PATH[PATH_MAX]; getcwd(SSL_CA_PATH,PATH_MAX); strcat(SSL_CA_PATH,"\\ca-bundle.crt"); curl_easy_setopt(curl, CURLOPT_CAINFO, SSL_CA_PATH); //printf("SSL_CA_PATH = '%s'\n",SSL_CA_PATH);
 #else
 	#define SSL_CERT
 //	#define SSL_CERT curl_easy_setopt(curl, CURLOPT_CAPATH, "./ca-bundle.crt");
@@ -125,7 +124,7 @@ FILE * REST_GET	(char ** params, char * url){
 	FILE * write = fdopen(fd[1], "w");
 	CURL * curl = curl_easy_init();
 	SSL_CERT
-	printf("url = %s\n",full_url);
+//	printf("url = %s\n",full_url);
 	curl_easy_setopt(curl,CURLOPT_URL,full_url);
 	curl_easy_setopt(curl,CURLOPT_WRITEDATA,(void*)write);
 	curl_easy_setopt(curl,CURLOPT_WRITEFUNCTION,WriteFileCB);
@@ -143,7 +142,7 @@ buffer REST_GET_BUFFER (char ** params, char * url){
 	SSL_CERT
 	buffer data = buffer_init(data,0);
 	curl_easy_setopt(curl,CURLOPT_URL,full_url);
-	printf("url = %s\n",full_url);
+//	printf("url = %s\n",full_url);
 	curl_easy_setopt(curl,CURLOPT_WRITEDATA,&data);
 //	curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 	curl_easy_setopt(curl,CURLOPT_WRITEFUNCTION,WriteBufferCB);
@@ -169,7 +168,8 @@ buffer  REST_POST (char ** params, char * url){
 	curl_easy_setopt(curl,CURLOPT_WRITEDATA, &data);
 	curl_easy_setopt(curl,CURLOPT_WRITEFUNCTION,WriteBufferCB);
 	CURLcode res = curl_easy_perform(curl);
-	printf("res = &d, data = %s\n",res,data.data);
+	if (res != CURLE_OK)
+		printf("res = &d, data = %s\n",res,data.data);
 	curl_easy_cleanup(curl);
 	free(--post);
 	free(escaped_url);
@@ -181,7 +181,7 @@ buffer REST_PUT_FILE (char** params, char* url, FILE * in){
 	buffer data = buffer_init(data,0);
 	char * full_url = rest_build_url(params,url);
 	free(full_url);
-	printf("%s\n",full_url);
+//	printf("%s\n",full_url);
 	curl_easy_setopt(curl,CURLOPT_URL,full_url);
 	curl_easy_setopt(curl,CURLOPT_UPLOAD, 1L);
 	curl_easy_setopt(curl,CURLOPT_READDATA,in);
@@ -292,5 +292,44 @@ const char * db_authorize_token (char* token, char * client_id, char* client_sec
 	}
 	printf(json_object_to_json_string(response));printf("\n");
 	return NULL;
+}
+
+json_object * db_mkdir(char* name, const char * access_token){
+	char * params[4];
+	params[0] = "root=dropbox";
+	rest_build_param(&params[1], "path",name);
+	rest_build_param(&params[2], "access_token", access_token);
+	params[3] = NULL;
+	buffer resp = REST_POST(params, FILES_MKDIR);
+	json_object * response = json_tokener_parse(resp.data);
+	free(params[1]);
+	free(params[2]);
+	return response;
+}
+json_object * db_mv(char* from, char * to, const char * access_token){
+	char * params[5];
+	params[0] = "root=dropbox";
+	rest_build_param(&params[1], "from_path",from);
+	rest_build_param(&params[2], "to_path", to);
+	rest_build_param(&params[3], "access_token", access_token);
+	params[4] = NULL;
+	buffer resp = REST_POST(params, FILES_MV);
+	json_object * response = json_tokener_parse(resp.data);
+	free(params[1]);
+	free(params[2]);
+	free(params[3]);
+	return response;
+}
+json_object * db_rm(char* name, const char * access_token){
+	char * params[4];
+	params[0] = "root=dropbox";
+	rest_build_param(&params[1], "path",name);
+	rest_build_param(&params[2], "access_token", access_token);
+	params[3] = NULL;
+	buffer resp = REST_POST(params, FILES_RM );
+	json_object * response = json_tokener_parse(resp.data);
+	free(params[1]);
+	free(params[2]);
+	return response;
 }
 

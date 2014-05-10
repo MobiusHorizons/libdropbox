@@ -84,7 +84,7 @@ int main(int argc, char** argv){
 	char * client_secret = "ia87pt0ep6dvb7y";
 	curl_global_init(CURL_GLOBAL_DEFAULT);
 	const char * access_token = init(client_key,client_secret);
-	printf("access_token = %s\n",access_token);
+//	printf("access_token = %s\n",access_token);
 	if (argc > 2 && strcmp(argv[1],"ls")== 0 ){
 		if (argc == 2) do_ls("/",access_token);
 		else do_ls(argv[2],access_token);
