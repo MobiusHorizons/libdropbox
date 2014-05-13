@@ -7,6 +7,7 @@
 #endif
 #include <json-c/json.h>
 #include <stdbool.h>
+#include "../librest/rest.h"
 
 FILE * db_files_get(char* path, const char* access_token);
 json_object * db_files_put(char* path, const char* access_token, FILE *   input_file);

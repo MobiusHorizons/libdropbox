@@ -9,13 +9,14 @@ SL:=.dll
 EXE:=.exe
 LIBS:= $(shell $(PKG_CONFIG) --static --libs libcurl )
 endif
-all: dropbox$(EXE) libdropbox$(SL)
+all: dropbox$(EXE) 
+#libdropbox$(SL)
 
 dropbox: dropbox_api.o dropbox_main.o
-	$(CC) $(CCFLAGS) -o dropbox dropbox_api.o dropbox_main.o -pthread -ljson-c -lcurl
+	$(CC) $(CCFLAGS) -o dropbox dropbox_api.o dropbox_main.o -L../librest/ -pthread -lrest -ljson-c -lcurl 
 
 dropbox.exe: dropbox_api.o dropbox_main.o
-	$(CC) -o dropbox.exe dropbox_api.o dropbox_main.o -lpthread -static -ljson-c -Lcurl/lib -lrtmp $(LIBS) -liconv -lrtmp -lssl -lwinmm -lws2_32 
+	$(CC) -o dropbox.exe dropbox_api.o dropbox_main.o -static -lpthread -ljson-c -L../librest -Wl,-Bdynamic,-lrest
 
 #i686-w64-mingw32-gcc -o dropbox.exe dropbox_api.o dropbox_main.o -pthread -static -ljson-c -Lcurl/lib -lrtmp $(mingw32-pkg-config --libs --static libcurl) -lrtmp -lssl -lwinmm -Wl,-Bdynamic -lws2_32
 

@@ -1,4 +1,7 @@
+#ifndef __BUFFER_H_
+#define __BUFFER_H_
 #include <stdlib.h>
+#include <string.h>
 
 typedef struct{
 	char * data;
@@ -39,3 +42,4 @@ buffer buffer_clone(buffer b){
 	memcpy(n.data,b.data,b.size);
 	return n;
 }
+#endif
