@@ -14,7 +14,7 @@ endif
 all: dropbox$(EXE) 
 #libdropbox$(SL)
 
-dropbox: dropbox_api.o dropbox_main.o
+dropbox: dropbox_api.o dropbox_main.o librest.so
 	$(CC) $(CCFLAGS) -o dropbox dropbox_api.o dropbox_main.o -Llibrest/ -pthread -lrest -ljson-c -lcurl 
 
 dropbox.exe: dropbox_api.wo dropbox_main.wo
@@ -35,7 +35,10 @@ dropbox_api$(OBJ): dropbox_api.c dropbox_api.h dropbox_urls.h buffer.h
 	$(CC) $(CCFLAGS) -o $@ -c dropbox_api.c
 
 dropbox_main$(OBJ): dropbox_main.c dropbox_api.h
-	$(CC) $(CCFLAGS) -o $@ -c dropbox_main.c 
+	$(CC) $(CCFLAGS) -o $@ -c dropbox_main.c
+
+librest.so: 
+	make install -C librest
 
 clean: 
 	rm -f *.o *.dll dropbox.exe dropbox *.so *.a *~ *.swp
